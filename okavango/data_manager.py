@@ -1,8 +1,12 @@
 from pathlib import Path
 import requests
 import pandas as pd
+import geopandas as gpd
+from pydantic import BaseModel
+from pathlib import Path
 
 DOWNLOADS_DIR = Path("downloads")
+
 
 DATASETS = {
     "annual_change_forest_area": "https://ourworldindata.org/grapher/annual-change-forest-area.csv",
@@ -43,3 +47,93 @@ def load_datasets(paths: dict[str, Path]) -> dict[str, pd.DataFrame]:
         dataframes[name] = df
 
     return dataframes
+
+
+NATURAL_EARTH_ZIP = DOWNLOADS_DIR / "ne_110m_admin_0_countries.zip"
+
+
+def load_world_map() -> gpd.GeoDataFrame:
+    if not NATURAL_EARTH_ZIP.exists():
+        raise FileNotFoundError(f"Falta o ficheiro: {NATURAL_EARTH_ZIP}")
+
+    world = gpd.read_file(NATURAL_EARTH_ZIP)
+    return world
+
+
+def latest_year_snapshot(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.dropna(subset=["Code"]).copy()
+    df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+    df = df.dropna(subset=["Year"])
+
+    latest_year = int(df["Year"].max())
+    return df[df["Year"] == latest_year].copy()
+
+
+def merge_world_with_dataset(
+    world: gpd.GeoDataFrame,
+    df: pd.DataFrame,
+    value_column: str,
+) -> gpd.GeoDataFrame:
+    snapshot = latest_year_snapshot(df)
+
+    merged = world.merge(
+        snapshot[["Code", "Entity", "Year", value_column]],
+        left_on="SOV_A3",
+        right_on="Code",
+        how="left",
+    )
+
+    return gpd.GeoDataFrame(merged, geometry="geometry", crs=world.crs)
+
+
+def load_all_csvs(paths: dict[str, Path]) -> dict[str, pd.DataFrame]:
+    return {name: pd.read_csv(path) for name, path in paths.items()}
+
+
+def detect_value_column(df: pd.DataFrame) -> str:
+    base_cols = {"Entity", "Code", "Year"}
+    candidates = [c for c in df.columns if c not in base_cols]
+
+    if len(candidates) != 1:
+        raise ValueError(f"Não consegui identificar a coluna de valores. Colunas extra: {candidates}")
+
+    return candidates[0]
+
+
+def build_merged_maps() -> dict[str, gpd.GeoDataFrame]:
+    paths = download_all_datasets()
+    dfs = load_all_csvs(paths)
+    world = load_world_map()
+
+    merged_maps: dict[str, gpd.GeoDataFrame] = {}
+
+    for name, df in dfs.items():
+        value_col = detect_value_column(df)
+        merged_maps[name] = merge_world_with_dataset(world, df, value_col)
+
+    return merged_maps
+
+
+class OkavangoConfig(BaseModel):
+    downloads_dir: Path = Path("downloads")
+    natural_earth_zip: str = "ne_110m_admin_0_countries.zip"
+
+
+class OkavangoData:
+    def __init__(self, config: OkavangoConfig):
+        self.config = config
+
+        # 1) download
+        self.paths = download_all_datasets()
+
+        # 2) load csvs
+        self.dfs = load_all_csvs(self.paths)
+
+        # 3) load map
+        self.world = load_world_map()
+
+        # 4) merged maps (GeoDataFrames)
+        self.maps = {}
+        for name, df in self.dfs.items():
+            value_col = detect_value_column(df)
+            self.maps[name] = merge_world_with_dataset(self.world, df, value_col)
