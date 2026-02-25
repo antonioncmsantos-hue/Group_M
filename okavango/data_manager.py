@@ -80,7 +80,7 @@ def merge_world_with_dataset(
         left_on="SOV_A3",
         right_on="Code",
         how="left",
-    )
+    ).rename(columns={value_column: "value"})  # <- ISTO
 
     return gpd.GeoDataFrame(merged, geometry="geometry", crs=world.crs)
 
