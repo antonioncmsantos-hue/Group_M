@@ -52,12 +52,11 @@ def load_datasets(paths: dict[str, Path]) -> dict[str, pd.DataFrame]:
 NATURAL_EARTH_ZIP = DOWNLOADS_DIR / "ne_110m_admin_0_countries.zip"
 
 
-def load_world_map() -> gpd.GeoDataFrame:
-    if not NATURAL_EARTH_ZIP.exists():
-        raise FileNotFoundError(f"Falta o ficheiro: {NATURAL_EARTH_ZIP}")
-
-    world = gpd.read_file(NATURAL_EARTH_ZIP)
-    return world
+def load_world_map(downloads_dir: Path, natural_earth_zip: str) -> gpd.GeoDataFrame:
+    path = downloads_dir / natural_earth_zip
+    if not path.exists():
+        raise FileNotFoundError(f"Falta o ficheiro: {path}")
+    return gpd.read_file(path)
 
 
 def latest_year_snapshot(df: pd.DataFrame) -> pd.DataFrame:
@@ -123,17 +122,26 @@ class OkavangoData:
     def __init__(self, config: OkavangoConfig):
         self.config = config
 
-        # 1) download
+        # Function 1
         self.paths = download_all_datasets()
 
-        # 2) load csvs
+        # read csvs -> atributos
         self.dfs = load_all_csvs(self.paths)
 
-        # 3) load map
-        self.world = load_world_map()
+        # map
+        self.world = load_world_map(
+            downloads_dir=self.config.downloads_dir,
+            natural_earth_zip=self.config.natural_earth_zip,
+        )
 
-        # 4) merged maps (GeoDataFrames)
-        self.maps = {}
+        # Function 2 (merge)
+        self.merged_maps = {}
         for name, df in self.dfs.items():
             value_col = detect_value_column(df)
-            self.maps[name] = merge_world_with_dataset(self.world, df, value_col)
+            self.merged_maps[name] = merge_world_with_dataset(
+                world=self.world,
+                df=df,
+                value_column=value_col,
+            )
+
+
