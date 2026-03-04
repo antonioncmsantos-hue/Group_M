@@ -1,3 +1,4 @@
+# Imports for data manipulation, geospatial, geometry, and the function under test.
 from __future__ import annotations
 
 import pandas as pd
@@ -8,7 +9,7 @@ from okavango.data_manager import merge_world_with_dataset
 
 
 def test_merge_world_with_dataset_uses_latest_year():
-    # world map fake (geopandas à esquerda) com SOV_A3 como no vosso Natural Earth
+    # Fake GeoDataFrame with two countries (PRT, ESP), mimicking a Natural Earth dataset.
     world = gpd.GeoDataFrame(
         {
             "SOV_A3": ["PRT", "ESP"],
@@ -19,7 +20,7 @@ def test_merge_world_with_dataset_uses_latest_year():
         crs="EPSG:4326",
     )
 
-    # df OWID fake com 2 anos (latest = 2024)
+    # Fake OWID DataFrame with 2 years per country (latest = 2024).
     df = pd.DataFrame(
         {
             "Entity": ["Portugal", "Portugal", "Spain", "Spain"],
@@ -28,10 +29,10 @@ def test_merge_world_with_dataset_uses_latest_year():
             "MyValue": [10, 11, 20, 21],
         }
     )
-
+    # Run the merge function with the fake data.
     merged = merge_world_with_dataset(world=world, df=df, value_column="MyValue")
 
-    # valida colunas e valores do último ano
+    # Check that the expected columns exist in the result.
     assert "MyValue" in merged.columns
     assert "Year" in merged.columns
 
@@ -39,6 +40,7 @@ def test_merge_world_with_dataset_uses_latest_year():
     esp_val = merged.loc[merged["SOV_A3"] == "ESP", "MyValue"].iloc[0]
     year_prt = merged.loc[merged["SOV_A3"] == "PRT", "Year"].iloc[0]
 
+    # Verify that the latest year's values are used: PRT=11, ESP=21, year=2024.
     assert prt_val == 11
     assert esp_val == 21
     assert int(year_prt) == 2024
