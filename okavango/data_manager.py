@@ -140,9 +140,14 @@ def load_world_map(downloads_dir: Path, natural_earth_zip: str) -> gpd.GeoDataFr
     >>> "geometry" in world.columns
     True
     """
+    NATURAL_EARTH_URL = "https://raw.githubusercontent.com/antonioncmsantos-hue/Group_M/main/okavango/data/ne_110m_admin_0_countries.zip"
+
     path = downloads_dir / natural_earth_zip
     if not path.exists():
-        raise FileNotFoundError(f"Falta o ficheiro: {path}")
+        downloads_dir.mkdir(exist_ok=True)
+        response = requests.get(NATURAL_EARTH_URL)
+        response.raise_for_status()
+        path.write_bytes(response.content)
     return gpd.read_file(path)
 
 
