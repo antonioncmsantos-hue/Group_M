@@ -47,6 +47,9 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import math
 import requests
+import ollama
+import subprocess
+from PIL import Image
 
 from okavango.data_manager import OkavangoData, OkavangoConfig
 
@@ -151,6 +154,44 @@ def download_satellite_image(
 
     output_path.write_bytes(response.content)
     return output_path
+
+def ensure_ollama_model(model_name: str) -> None:
+    """Pull the Ollama model if it does not exist locally."""
+    result = subprocess.run(
+        ["ollama", "list"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    if model_name not in result.stdout:
+        subprocess.run(
+            ["ollama", "pull", model_name],
+            check=True,
+        )
+
+
+def describe_image_with_ollama(
+    image_path: Path,
+    model_name: str = "llava",
+) -> str:
+    """Generate an image description using an Ollama vision model."""
+    response = ollama.chat(
+        model=model_name,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Describe this satellite image. Focus on vegetation, water, "
+                    "roads, bare soil, urban expansion, mining, fire scars, "
+                    "erosion, and signs of deforestation."
+                ),
+                "images": [str(image_path)],
+            }
+        ],
+    )
+
+    return response["message"]["content"]
 
 @st.cache_resource
 def load_data() -> OkavangoData:
@@ -284,4 +325,20 @@ elif page == "Satellite Analysis":
                 st.error(f"Failed to download image: {error}")
 
         if image_path.exists():
-            st.image(str(image_path), caption="Satellite image", use_container_width=True)
+            try:
+                image = Image.open(image_path)
+                st.image(image, caption="Satellite image", use_container_width=True)
+
+                st.info("Generating image description with Ollama...")
+
+                ensure_ollama_model("llava")
+                image_description = describe_image_with_ollama(
+                    image_path,
+                    model_name="llava"
+                )
+
+                st.subheader("Image Description")
+                st.write(image_description)
+
+            except Exception as error:
+                st.error(f"Failed to open image or generate description: {error}")
