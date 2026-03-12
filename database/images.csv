@@ -140,3 +140,32 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,No
+2026-03-12T18:04:35.235417,-3.4653,-62.2159,10,C:\Users\anton\OneDrive - Nova SBE\Nova\S2\Advanced Programming\AP_GP\Group_M\images\img_lat_m3_465300_lon_m62_215900_zoom_10.png," This is an aerial image of what appears to be a large area of natural landscape, which includes various elements such as vegetation, water bodies, roads, bare soil, urban areas, mining sites, and fire scars. The image shows dense green forested areas that are indicative of healthy vegetation. There are patches where the forest is less dense, which could be due to deforestation or land degradation caused by human activities such as agriculture or mining. Water bodies can be seen interspersed throughout the landscape, some possibly being natural bodies and others man-made reservoirs.
+
+There are roads crisscrossing through the area, indicating a developed infrastructure for transportation or resource extraction. The presence of bare soil could be due to natural processes like erosion or human activities such as deforestation or land clearance for agriculture. Urban areas with dense buildings and structures suggest human settlements and expansion into the surrounding environment. There are areas where mining is taking place, which can lead to land degradation and scarring on the landscape.
+
+Fire scars can be identified by the brownish patches within the forested areas, likely caused by wildfires. The presence of these fire-scarred zones indicates that this region has experienced fires in the past. The overall condition of the vegetation varies across the image, suggesting a diverse ecosystem with different stages of growth and recovery.
+
+The image provides a comprehensive view of the land use patterns within this region, highlighting areas where human activities are more concentrated and contrasting them with more pristine natural environments. It serves as a visual record of the interactions between humans and nature in this particular landscape. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""Yes"",
+  ""confidence"": ""High"",
+  ""summary"": ""The satellite image suggests that the area is under environmental danger due to signs of deforestation, land degradation, mining activity, wildfire scars, and urban encroachment into natural land."",
+  ""reasons"": [
+    ""Deforestation or land degradation caused by human activities such as agriculture or mining"",
+    ""Presence of fire-scarred zones indicating past wildfires"",
+    ""Urban areas with dense buildings and structures expanding into the surrounding environment""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,Yes
