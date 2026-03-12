@@ -1,0 +1,13 @@
+streamlit
+pandas
+geopandas
+shapely
+matplotlib
+requests
+pydantic
+PyYAML
+Pillow
+ollama
+pytest
+fiona
+pyproj
