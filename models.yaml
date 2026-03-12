@@ -1,0 +1,17 @@
+image_analysis:
+  model: llava
+  prompt: >
+    Describe this satellite image. Focus on vegetation, water, roads,
+    bare soil, urbanization, mining, fire scars, erosion, and signs of deforestation.
+  temperature: 0.2
+
+risk_analysis:
+  model: mistral
+  prompt: >
+    Based on this satellite image description, determine whether the area is at environmental risk.
+    Consider deforestation, land degradation, mining, erosion, wildfires,
+    habitat fragmentation, and water stress.
+    Answer with:
+    1. a short explanation
+    2. a final label: LOW, MEDIUM, or HIGH
+  temperature: 0.2
