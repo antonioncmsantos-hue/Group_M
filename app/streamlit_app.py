@@ -50,6 +50,7 @@ import requests
 import ollama
 import subprocess
 from PIL import Image
+import json
 
 from okavango.data_manager import OkavangoData, OkavangoConfig
 
@@ -209,35 +210,40 @@ def assess_environmental_risk_with_ollama(
     ensure_ollama_model(model_name)
 
     prompt = f"""
-You are an environmental risk analyst.
+You are an environmental risk screening assistant.
 
-Given the following satellite image description, assess whether the area appears to be at environmental risk.
+Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
 
-Check for possible signs of:
+Consider signs of:
 - deforestation
 - land degradation
 - erosion
 - mining activity
-- wildfire damage
+- wildfire scars
 - flooding
 - drought
 - water stress
-- urban encroachment into natural areas
+- urban encroachment into natural land
 - habitat destruction
 
-Image description:
+Satellite image description:
 {image_description}
 
-Reply in exactly this format:
+Set confidence to High only if the evidence is very clear, Medium if there are visible indicators but some uncertainty, and Low if the evidence is weak or ambiguous.
 
-Danger: Y or N
-Confidence: Low, Medium, or High
-Reasons:
-- reason 1
-- reason 2
-- reason 3
+Return ONLY valid JSON in this exact structure:
+
+{{
+  "danger": "Yes or No",
+  "confidence": "Low or Medium or High",
+  "summary": "one short paragraph",
+  "reasons": [
+    "reason 1",
+    "reason 2",
+    "reason 3"
+  ]
+}}
 """
-
     response = ollama.chat(
         model=model_name,
         messages=[
@@ -251,26 +257,42 @@ Reasons:
     return response["message"]["content"]
 
 
-def extract_danger_flag(risk_response: str) -> str:
-    """Extract the danger flag from the model response."""
-    response_upper = risk_response.upper()
+def parse_risk_response(risk_response: str) -> dict:
+    """Parse the JSON response from the risk assessment model."""
+    try:
+        parsed = json.loads(risk_response)
+        return {
+            "danger": parsed.get("danger", "UNKNOWN"),
+            "confidence": parsed.get("confidence", "Unknown"),
+            "summary": parsed.get("summary", ""),
+            "reasons": parsed.get("reasons", []),
+        }
+    except json.JSONDecodeError:
+        return {
+            "danger": "UNKNOWN",
+            "confidence": "Unknown",
+            "summary": risk_response,
+            "reasons": [],
+        }
 
-    if "DANGER: Y" in response_upper:
-        return "Y"
-    if "DANGER: N" in response_upper:
-        return "N"
-
-    return "UNKNOWN"
 
 
-def display_risk_status(danger_flag: str) -> None:
+
+def display_risk_status(danger_flag: str, confidence: str) -> None:
     """Display a visual risk indicator in Streamlit."""
     if danger_flag == "Y":
-        st.error("⚠️ Area flagged as being at environmental risk.")
+        if confidence == "High":
+            st.error("⚠️ Area flagged as being at environmental risk.")
+        else:
+            st.warning("⚠️ Area possibly flagged as being at environmental risk.")
     elif danger_flag == "N":
-        st.success("✅ Area not flagged as being at environmental risk.")
+        if confidence == "High":
+            st.success("✅ Area not flagged as being at environmental risk.")
+        else:
+            st.info("ℹ️ No clear environmental risk detected, but confidence is limited.")
     else:
         st.warning("❓ Risk status could not be determined clearly.")
+
 
 
 
@@ -427,11 +449,22 @@ elif page == "Satellite Analysis":
                     model_name="llama3.2:3b",
                 )
 
-                st.subheader("Environmental Risk Assessment")
-                st.write(risk_response)
+                parsed_risk = parse_risk_response(risk_response)
 
-                danger_flag = extract_danger_flag(risk_response)
-                display_risk_status(danger_flag)
+                st.subheader("Environmental Risk Assessment")
+                st.write(f"**Danger:** {parsed_risk['danger']}")
+                st.write(f"**Confidence:** {parsed_risk['confidence']}")
+                st.write(f"**Summary:** {parsed_risk['summary']}")
+
+                if parsed_risk["reasons"]:
+                    st.write("**Reasons:**")
+                    for reason in parsed_risk["reasons"]:
+                        st.markdown(f"- {reason}")
+
+                display_risk_status(
+                    parsed_risk["danger"],
+                    parsed_risk["confidence"],
+                )
 
             except Exception as error:
                 st.error(f"Failed to open image or run AI pipeline: {error}")
