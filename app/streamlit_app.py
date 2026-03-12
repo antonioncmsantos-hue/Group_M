@@ -45,6 +45,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+import math
+import requests
 
 from okavango.data_manager import OkavangoData, OkavangoConfig
 
@@ -54,6 +56,14 @@ from okavango.data_manager import OkavangoData, OkavangoConfig
 st.set_page_config(layout="wide")
 st.title("🌍 Project Okavango")
 
+IMAGES_DIR = PROJECT_ROOT / "images"
+IMAGES_DIR.mkdir(exist_ok=True)
+
+ESRI_WORLD_IMAGERY_EXPORT_URL = (
+    "https://services.arcgisonline.com/ArcGIS/rest/services/"
+    "World_Imagery/MapServer/export"
+)
+
 page = st.sidebar.selectbox(
     "Select page",
     ["Maps", "Satellite Analysis"]
@@ -62,6 +72,86 @@ page = st.sidebar.selectbox(
 # ---------------------------------------------------------------------------
 # Data Loading
 # ---------------------------------------------------------------------------
+
+def build_image_path(latitude: float, longitude: float, zoom: int) -> Path:
+    """Create a stable image file path from coordinates and zoom."""
+    safe_lat = f"{latitude:.6f}".replace("-", "m").replace(".", "_")
+    safe_lon = f"{longitude:.6f}".replace("-", "m").replace(".", "_")
+    filename = f"img_lat_{safe_lat}_lon_{safe_lon}_zoom_{zoom}.png"
+    return IMAGES_DIR / filename
+
+def latlon_to_web_mercator(latitude: float, longitude: float) -> tuple[float, float]:
+    """Convert latitude/longitude (EPSG:4326) to Web Mercator (EPSG:3857)."""
+    origin_shift = 20037508.34
+    x = longitude * origin_shift / 180.0
+
+    lat = max(min(latitude, 85.05112878), -85.05112878)
+    y = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / (math.pi / 180.0)
+    y = y * origin_shift / 180.0
+
+    return x, y
+
+
+def build_bbox_web_mercator(
+    latitude: float,
+    longitude: float,
+    zoom: int,
+    width: int = 640,
+    height: int = 640,
+) -> tuple[float, float, float, float]:
+    """Build a bbox around the selected point using a simple zoom-based scale."""
+    center_x, center_y = latlon_to_web_mercator(latitude, longitude)
+
+    initial_resolution = 156543.03392804097
+    resolution = initial_resolution / (2 ** zoom)
+
+    half_width_m = (width * resolution) / 2
+    half_height_m = (height * resolution) / 2
+
+    xmin = center_x - half_width_m
+    ymin = center_y - half_height_m
+    xmax = center_x + half_width_m
+    ymax = center_y + half_height_m
+
+    return xmin, ymin, xmax, ymax
+
+
+def download_satellite_image(
+    latitude: float,
+    longitude: float,
+    zoom: int,
+    output_path: Path,
+    width: int = 640,
+    height: int = 640,
+) -> Path:
+    """Download a satellite image from ESRI World Imagery."""
+    xmin, ymin, xmax, ymax = build_bbox_web_mercator(
+        latitude=latitude,
+        longitude=longitude,
+        zoom=zoom,
+        width=width,
+        height=height,
+    )
+
+    params = {
+        "bbox": f"{xmin},{ymin},{xmax},{ymax}",
+        "bboxSR": 3857,
+        "imageSR": 3857,
+        "size": f"{width},{height}",
+        "format": "jpg",
+        "f": "image",
+    }
+
+    response = requests.get(
+        ESRI_WORLD_IMAGERY_EXPORT_URL,
+        params=params,
+        timeout=60,
+    )
+    response.raise_for_status()
+
+    output_path.write_bytes(response.content)
+    return output_path
+
 @st.cache_resource
 def load_data() -> OkavangoData:
     """Load and cache the Okavango dataset manager."""
@@ -170,4 +260,28 @@ elif page == "Satellite Analysis":
         st.write(f"Longitude: {longitude}")
         st.write(f"Zoom: {zoom}")
 
-        st.info("Next step: download the satellite image for these coordinates.")
+        image_path = build_image_path(latitude, longitude, zoom)
+
+        st.write("Image will be saved as:")
+        st.code(str(image_path))
+
+        if image_path.exists():
+            st.success("This image already exists. No need to download it again.")
+        else:
+            st.warning("This image does not exist yet. Downloading now...")
+
+            try:
+                download_satellite_image(
+                    latitude=latitude,
+                    longitude=longitude,
+                    zoom=zoom,
+                    output_path=image_path,
+                    width=640,
+                    height=640,
+                )
+                st.success("Satellite image downloaded successfully.")
+            except Exception as error:
+                st.error(f"Failed to download image: {error}")
+
+        if image_path.exists():
+            st.image(str(image_path), caption="Satellite image", use_container_width=True)
