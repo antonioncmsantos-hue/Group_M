@@ -207,8 +207,3 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-#image 
-images/
-database/images.csv
-__pycache__/
-*.pyc

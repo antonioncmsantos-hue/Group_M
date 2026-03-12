@@ -1,17 +1,37 @@
 image_analysis:
-  model: llava
+  model: "llava:7b"
   prompt: >
     Describe this satellite image. Focus on vegetation, water, roads,
-    bare soil, urbanization, mining, fire scars, erosion, and signs of deforestation.
+    bare soil, urban expansion, mining, fire scars, erosion,
+    and visible signs of deforestation or land degradation.
   temperature: 0.2
 
 risk_analysis:
-  model: mistral
+  model: "llama3.2:3b"
   prompt: >
-    Based on this satellite image description, determine whether the area is at environmental risk.
-    Consider deforestation, land degradation, mining, erosion, wildfires,
-    habitat fragmentation, and water stress.
-    Answer with:
-    1. a short explanation
-    2. a final label: LOW, MEDIUM, or HIGH
+    You are an environmental risk screening assistant.
+    Your task is to determine whether a satellite image description suggests
+    that the area may be under environmental danger.
+
+    Consider signs of deforestation, land degradation, erosion,
+    mining activity, wildfire scars, flooding, drought,
+    water stress, urban encroachment into natural land,
+    and habitat destruction.
+
+    Return ONLY valid JSON in this exact structure:
+    {
+      "danger": "Yes or No",
+      "confidence": "Low or Medium or High",
+      "summary": "one short paragraph",
+      "reasons": [
+        "reason 1",
+        "reason 2",
+        "reason 3"
+      ]
+    }
   temperature: 0.2
+
+image_settings:
+  width: 640
+  height: 640
+  format: "jpg"

@@ -51,6 +51,7 @@ import ollama
 import subprocess
 from PIL import Image
 import json
+import yaml
 
 from okavango.data_manager import OkavangoData, OkavangoConfig
 
@@ -72,6 +73,7 @@ page = st.sidebar.selectbox(
     "Select page",
     ["Maps", "Satellite Analysis"]
 )
+
 
 # ---------------------------------------------------------------------------
 # Data Loading
@@ -179,7 +181,8 @@ def ensure_ollama_model(model_name: str) -> None:
 
 def describe_image_with_ollama(
     image_path: Path,
-    model_name: str = "llava:7b",
+    model_name: str,
+    prompt: str,
 ) -> str:
     """Generate an image description using an Ollama vision model."""
     ensure_ollama_model(model_name)
@@ -189,11 +192,7 @@ def describe_image_with_ollama(
         messages=[
             {
                 "role": "user",
-                "content": (
-                    "Describe this satellite image. Focus on vegetation, water, "
-                    "roads, bare soil, urban expansion, mining, fire scars, "
-                    "erosion, and signs of deforestation."
-                ),
+                "content": prompt,
                 "images": [str(image_path)],
             }
         ],
@@ -204,52 +203,20 @@ def describe_image_with_ollama(
 
 def assess_environmental_risk_with_ollama(
     image_description: str,
-    model_name: str = "llama3.2:3b",
+    model_name: str,
+    prompt: str,
 ) -> str:
     """Assess environmental risk from an image description using an Ollama text model."""
     ensure_ollama_model(model_name)
 
-    prompt = f"""
-You are an environmental risk screening assistant.
+    full_prompt = f"{prompt}\n\nSatellite image description:\n{image_description}"
 
-Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
-
-Consider signs of:
-- deforestation
-- land degradation
-- erosion
-- mining activity
-- wildfire scars
-- flooding
-- drought
-- water stress
-- urban encroachment into natural land
-- habitat destruction
-
-Satellite image description:
-{image_description}
-
-Set confidence to High only if the evidence is very clear, Medium if there are visible indicators but some uncertainty, and Low if the evidence is weak or ambiguous.
-
-Return ONLY valid JSON in this exact structure:
-
-{{
-  "danger": "Yes or No",
-  "confidence": "Low or Medium or High",
-  "summary": "one short paragraph",
-  "reasons": [
-    "reason 1",
-    "reason 2",
-    "reason 3"
-  ]
-}}
-"""
     response = ollama.chat(
         model=model_name,
         messages=[
             {
                 "role": "user",
-                "content": prompt,
+                "content": full_prompt,
             }
         ],
     )
@@ -280,12 +247,12 @@ def parse_risk_response(risk_response: str) -> dict:
 
 def display_risk_status(danger_flag: str, confidence: str) -> None:
     """Display a visual risk indicator in Streamlit."""
-    if danger_flag == "Y":
+    if danger_flag == "Yes":
         if confidence == "High":
             st.error("⚠️ Area flagged as being at environmental risk.")
         else:
             st.warning("⚠️ Area possibly flagged as being at environmental risk.")
-    elif danger_flag == "N":
+    elif danger_flag == "No":
         if confidence == "High":
             st.success("✅ Area not flagged as being at environmental risk.")
         else:
@@ -294,6 +261,10 @@ def display_risk_status(danger_flag: str, confidence: str) -> None:
         st.warning("❓ Risk status could not be determined clearly.")
 
 
+def load_model_config(config_path: Path = PROJECT_ROOT / "models.yaml") -> dict:
+    """Load model and prompt configuration from a YAML file."""
+    with open(config_path, "r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
 
 @st.cache_resource
@@ -303,6 +274,8 @@ def load_data() -> OkavangoData:
 
 
 data = load_data()
+
+model_config = load_model_config()
 
 # ---------------------------------------------------------------------------
 # PAGE 1 — MAPS
@@ -375,6 +348,7 @@ if page == "Maps":
 # PAGE 2 — SATELLITE ANALYSIS
 # ---------------------------------------------------------------------------
 elif page == "Satellite Analysis":
+
     st.header("Satellite Image Environmental Analysis")
 
     latitude = st.number_input(
@@ -398,6 +372,15 @@ elif page == "Satellite Analysis":
 
     run_analysis = st.button("Analyze Area")
 
+    image_model = model_config["image_analysis"]["model"]
+    image_prompt = model_config["image_analysis"]["prompt"]
+
+    risk_model = model_config["risk_analysis"]["model"]
+    risk_prompt = model_config["risk_analysis"]["prompt"]
+
+    image_width = model_config["image_settings"]["width"]
+    image_height = model_config["image_settings"]["height"]
+
     if run_analysis:
         st.write("Coordinates selected:")
         st.write(f"Latitude: {latitude}")
@@ -420,8 +403,8 @@ elif page == "Satellite Analysis":
                     longitude=longitude,
                     zoom=zoom,
                     output_path=image_path,
-                    width=640,
-                    height=640,
+                    width=image_width,
+                    height=image_height,
                 )
                 st.success("Satellite image downloaded successfully.")
             except Exception as error:
@@ -435,8 +418,9 @@ elif page == "Satellite Analysis":
                 st.info("Generating image description with Ollama...")
 
                 image_description = describe_image_with_ollama(
-                    image_path,
-                    model_name="llava:7b"
+                    image_path=image_path,
+                    model_name=image_model,
+                    prompt=image_prompt,
                 )
 
                 st.subheader("Image Description")
@@ -446,7 +430,8 @@ elif page == "Satellite Analysis":
 
                 risk_response = assess_environmental_risk_with_ollama(
                     image_description=image_description,
-                    model_name="llama3.2:3b",
+                    model_name=risk_model,
+                    prompt=risk_prompt,
                 )
 
                 parsed_risk = parse_risk_response(risk_response)
