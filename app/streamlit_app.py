@@ -200,6 +200,80 @@ def describe_image_with_ollama(
 
     return response["message"]["content"]
 
+
+def assess_environmental_risk_with_ollama(
+    image_description: str,
+    model_name: str = "llama3.2:3b",
+) -> str:
+    """Assess environmental risk from an image description using an Ollama text model."""
+    ensure_ollama_model(model_name)
+
+    prompt = f"""
+You are an environmental risk analyst.
+
+Given the following satellite image description, assess whether the area appears to be at environmental risk.
+
+Check for possible signs of:
+- deforestation
+- land degradation
+- erosion
+- mining activity
+- wildfire damage
+- flooding
+- drought
+- water stress
+- urban encroachment into natural areas
+- habitat destruction
+
+Image description:
+{image_description}
+
+Reply in exactly this format:
+
+Danger: Y or N
+Confidence: Low, Medium, or High
+Reasons:
+- reason 1
+- reason 2
+- reason 3
+"""
+
+    response = ollama.chat(
+        model=model_name,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+    )
+
+    return response["message"]["content"]
+
+
+def extract_danger_flag(risk_response: str) -> str:
+    """Extract the danger flag from the model response."""
+    response_upper = risk_response.upper()
+
+    if "DANGER: Y" in response_upper:
+        return "Y"
+    if "DANGER: N" in response_upper:
+        return "N"
+
+    return "UNKNOWN"
+
+
+def display_risk_status(danger_flag: str) -> None:
+    """Display a visual risk indicator in Streamlit."""
+    if danger_flag == "Y":
+        st.error("⚠️ Area flagged as being at environmental risk.")
+    elif danger_flag == "N":
+        st.success("✅ Area not flagged as being at environmental risk.")
+    else:
+        st.warning("❓ Risk status could not be determined clearly.")
+
+
+
 @st.cache_resource
 def load_data() -> OkavangoData:
     """Load and cache the Okavango dataset manager."""
@@ -338,7 +412,6 @@ elif page == "Satellite Analysis":
 
                 st.info("Generating image description with Ollama...")
 
-                ensure_ollama_model("llava:7b")
                 image_description = describe_image_with_ollama(
                     image_path,
                     model_name="llava:7b"
@@ -347,5 +420,18 @@ elif page == "Satellite Analysis":
                 st.subheader("Image Description")
                 st.write(image_description)
 
+                st.info("Assessing environmental risk...")
+
+                risk_response = assess_environmental_risk_with_ollama(
+                    image_description=image_description,
+                    model_name="llama3.2:3b",
+                )
+
+                st.subheader("Environmental Risk Assessment")
+                st.write(risk_response)
+
+                danger_flag = extract_danger_flag(risk_response)
+                display_risk_status(danger_flag)
+
             except Exception as error:
-                st.error(f"Failed to open image or generate description: {error}")
+                st.error(f"Failed to open image or run AI pipeline: {error}")
