@@ -55,6 +55,8 @@ import yaml
 
 from okavango.data_manager import OkavangoData, OkavangoConfig
 
+from datetime import datetime
+
 # ---------------------------------------------------------------------------
 # Page Configuration
 # ---------------------------------------------------------------------------
@@ -267,6 +269,119 @@ def load_model_config(config_path: Path = PROJECT_ROOT / "models.yaml") -> dict:
         return yaml.safe_load(file)
 
 
+DB_PATH = PROJECT_ROOT / "database" / "images.csv"
+
+
+def load_image_database(db_path: Path = DB_PATH) -> pd.DataFrame:
+    """Load the image analysis database from CSV."""
+    if not db_path.exists() or db_path.stat().st_size == 0:
+        return pd.DataFrame(
+            columns=[
+                "timestamp",
+                "latitude",
+                "longitude",
+                "zoom",
+                "image_path",
+                "image_description",
+                "image_prompt",
+                "image_model",
+                "text_assessment",
+                "text_prompt",
+                "text_model",
+                "danger",
+            ]
+        )
+
+    return pd.read_csv(db_path)
+
+
+DB_PATH = PROJECT_ROOT / "database" / "images.csv"
+
+
+def load_image_database(db_path: Path = DB_PATH) -> pd.DataFrame:
+    """Load the image analysis database from CSV."""
+    if not db_path.exists() or db_path.stat().st_size == 0:
+        return pd.DataFrame(
+            columns=[
+                "timestamp",
+                "latitude",
+                "longitude",
+                "zoom",
+                "image_path",
+                "image_description",
+                "image_prompt",
+                "image_model",
+                "text_assessment",
+                "text_prompt",
+                "text_model",
+                "danger",
+            ]
+        )
+
+    return pd.read_csv(db_path)
+
+
+def find_existing_analysis(
+    latitude: float,
+    longitude: float,
+    zoom: int,
+    db_path: Path = DB_PATH,
+) -> pd.Series | None:
+    """Check whether an analysis already exists for the same settings."""
+    df = load_image_database(db_path)
+
+    matches = df[
+        (df["latitude"] == latitude)
+        & (df["longitude"] == longitude)
+        & (df["zoom"] == zoom)
+    ]
+
+    if matches.empty:
+        return None
+
+    return matches.iloc[-1]
+
+
+def append_analysis_to_database(
+    latitude: float,
+    longitude: float,
+    zoom: int,
+    image_path: Path,
+    image_description: str,
+    image_prompt: str,
+    image_model: str,
+    text_assessment: str,
+    text_prompt: str,
+    text_model: str,
+    danger: str,
+    db_path: Path = DB_PATH,
+) -> None:
+    """Append one analysis result to the CSV database."""
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    new_row = pd.DataFrame(
+        [
+            {
+                "timestamp": datetime.now().isoformat(),
+                "latitude": latitude,
+                "longitude": longitude,
+                "zoom": zoom,
+                "image_path": str(image_path),
+                "image_description": image_description,
+                "image_prompt": image_prompt,
+                "image_model": image_model,
+                "text_assessment": text_assessment,
+                "text_prompt": text_prompt,
+                "text_model": text_model,
+                "danger": danger,
+            }
+        ]
+    )
+
+    file_exists = db_path.exists() and db_path.stat().st_size > 0
+    new_row.to_csv(db_path, mode="a", header=not file_exists, index=False)
+
+
 @st.cache_resource
 def load_data() -> OkavangoData:
     """Load and cache the Okavango dataset manager."""
@@ -389,8 +504,43 @@ elif page == "Satellite Analysis":
 
         image_path = build_image_path(latitude, longitude, zoom)
 
+        existing_result = find_existing_analysis(
+            latitude=latitude,
+            longitude=longitude,
+            zoom=zoom,
+        )
+
         st.write("Image will be saved as:")
         st.code(str(image_path))
+
+        if existing_result is not None:
+            st.success("Analysis already exists in the database. Reusing stored result.")
+
+            if Path(existing_result["image_path"]).exists():
+                image = Image.open(existing_result["image_path"])
+                st.image(image, caption="Satellite image", use_container_width=True)
+
+            st.subheader("Image Description")
+            st.write(existing_result["image_description"])
+
+            parsed_risk = parse_risk_response(existing_result["text_assessment"])
+
+            st.subheader("Environmental Risk Assessment")
+            st.write(f"**Danger:** {parsed_risk['danger']}")
+            st.write(f"**Confidence:** {parsed_risk['confidence']}")
+            st.write(f"**Summary:** {parsed_risk['summary']}")
+
+            if parsed_risk["reasons"]:
+                st.write("**Reasons:**")
+                for reason in parsed_risk["reasons"]:
+                    st.markdown(f"- {reason}")
+
+            display_risk_status(
+                parsed_risk["danger"],
+                parsed_risk["confidence"],
+            )
+
+            st.stop()
 
         if image_path.exists():
             st.success("This image already exists. No need to download it again.")
@@ -449,6 +599,20 @@ elif page == "Satellite Analysis":
                 display_risk_status(
                     parsed_risk["danger"],
                     parsed_risk["confidence"],
+                )
+
+                append_analysis_to_database(
+                    latitude=latitude,
+                    longitude=longitude,
+                    zoom=zoom,
+                    image_path=image_path,
+                    image_description=image_description,
+                    image_prompt=image_prompt,
+                    image_model=image_model,
+                    text_assessment=risk_response,
+                    text_prompt=risk_prompt,
+                    text_model=risk_model,
+                    danger=parsed_risk["danger"],
                 )
 
             except Exception as error:
