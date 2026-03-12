@@ -157,12 +157,17 @@ def download_satellite_image(
 
 def ensure_ollama_model(model_name: str) -> None:
     """Pull the Ollama model if it does not exist locally."""
-    result = subprocess.run(
-        ["ollama", "list"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    try:
+        result = subprocess.run(
+            ["ollama", "list"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError as error:
+        raise RuntimeError(
+            "Ollama is not installed or not available in PATH."
+        ) from error
 
     if model_name not in result.stdout:
         subprocess.run(
@@ -173,9 +178,11 @@ def ensure_ollama_model(model_name: str) -> None:
 
 def describe_image_with_ollama(
     image_path: Path,
-    model_name: str = "llava",
+    model_name: str = "llava:7b",
 ) -> str:
     """Generate an image description using an Ollama vision model."""
+    ensure_ollama_model(model_name)
+
     response = ollama.chat(
         model=model_name,
         messages=[
@@ -331,10 +338,10 @@ elif page == "Satellite Analysis":
 
                 st.info("Generating image description with Ollama...")
 
-                ensure_ollama_model("llava")
+                ensure_ollama_model("llava:7b")
                 image_description = describe_image_with_ollama(
                     image_path,
-                    model_name="llava"
+                    model_name="llava:7b"
                 )
 
                 st.subheader("Image Description")
