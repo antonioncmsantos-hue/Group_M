@@ -18,7 +18,7 @@ DATASETS = {
 }
 
 
-def download_csv(url: str, filename: str) -> Path:
+def download_csv(url: str, filename: str, downloads_dir: Path) -> Path:
     """
     Download a single CSV file from a URL and save it to the downloads directory.
 
@@ -45,36 +45,26 @@ def download_csv(url: str, filename: str) -> Path:
     >>> path.exists()
     True
     """
-    DOWNLOADS_DIR.mkdir(exist_ok=True)
 
-    response = requests.get(url)
+    downloads_dir.mkdir(parents=True, exist_ok=True)
+
+    response = requests.get(url, timeout=30)
     response.raise_for_status()
 
-    file_path = DOWNLOADS_DIR / filename
+    file_path = downloads_dir / filename
     file_path.write_bytes(response.content)
     return file_path
 
 
-def download_all_datasets() -> dict[str, Path]:
+def download_all_datasets(downloads_dir: Path) -> dict[str, Path]:
     """
-    Download all datasets defined in DATASETS to the downloads directory.
-
-    Returns
-    -------
-    dict[str, Path]
-        A dictionary mapping each dataset name to its local file path.
-
-    Examples
-    --------
-    >>> paths = download_all_datasets()
-    >>> "red_list_index" in paths
-    True
+    Download all datasets defined in DATASETS to downloads_dir.
     """
-    paths = {}
+    paths: dict[str, Path] = {}
 
     for name, url in DATASETS.items():
         filename = f"{name}.csv"
-        path = download_csv(url=url, filename=filename)
+        path = download_csv(url=url, filename=filename, downloads_dir=downloads_dir)
         paths[name] = path
 
     return paths
@@ -109,46 +99,44 @@ def load_datasets(paths: dict[str, Path]) -> dict[str, pd.DataFrame]:
     return dataframes
 
 
-# Default path to the Natural Earth zip file used for the world map.
-NATURAL_EARTH_ZIP = DOWNLOADS_DIR / "ne_110m_admin_0_countries.zip"
-
-
 def load_world_map(downloads_dir: Path, natural_earth_zip: str) -> gpd.GeoDataFrame:
     """
     Load the Natural Earth world map from a local zip file.
-
-    Parameters
-    ----------
-    downloads_dir : Path
-        The directory where the Natural Earth zip file is stored.
-    natural_earth_zip : str
-        The filename of the Natural Earth zip file.
-
-    Returns
-    -------
-    gpd.GeoDataFrame
-        A GeoDataFrame containing country geometries and metadata.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the zip file does not exist at the expected path.
-
-    Examples
-    --------
-    >>> world = load_world_map(Path("downloads"), "ne_110m_admin_0_countries.zip")
-    >>> "geometry" in world.columns
-    True
     """
-    NATURAL_EARTH_URL = "https://raw.githubusercontent.com/antonioncmsantos-hue/Group_M/main/okavango/data/ne_110m_admin_0_countries.zip"
-
     path = downloads_dir / natural_earth_zip
+
     if not path.exists():
-        downloads_dir.mkdir(exist_ok=True)
-        response = requests.get(NATURAL_EARTH_URL)
+        raise FileNotFoundError(f"Natural Earth zip not found: {path}")
+
+    return gpd.read_file(path)
+
+
+NATURAL_EARTH_URL = (
+    "https://naciscdn.org/naturalearth/110m/cultural/"
+    "ne_110m_admin_0_countries.zip"
+)
+NATURAL_EARTH_FILENAME = "ne_110m_admin_0_countries.zip"
+
+
+def download_natural_earth_map(
+    downloads_dir: Path,
+    url: str = NATURAL_EARTH_URL,
+    filename: str = NATURAL_EARTH_FILENAME,
+) -> Path:
+    """
+    Download the Natural Earth countries zip file into downloads_dir.
+    """
+    downloads_dir.mkdir(parents=True, exist_ok=True)
+    path = downloads_dir / filename
+
+    if not path.exists():
+        response = requests.get(url, timeout=30)
         response.raise_for_status()
         path.write_bytes(response.content)
-    return gpd.read_file(path)
+
+    return path
+
+
 
 
 def latest_year_snapshot(df: pd.DataFrame) -> pd.DataFrame:
@@ -286,29 +274,13 @@ def detect_value_column(df: pd.DataFrame) -> str:
     return candidates[0]
 
 
-def build_merged_maps() -> dict[str, gpd.GeoDataFrame]:
-    """
-    Download all datasets, load the world map, and produce one merged GeoDataFrame per dataset.
-
-    Returns
-    -------
-    dict[str, gpd.GeoDataFrame]
-        A dictionary mapping each dataset name to its merged GeoDataFrame.
-
-    Notes
-    -----
-    This is a convenience function that chains download_all_datasets, load_all_csvs,
-    load_world_map, and merge_world_with_dataset together.
-
-    Examples
-    --------
-    >>> maps = build_merged_maps()
-    >>> "red_list_index" in maps
-    True
-    """
-    paths = download_all_datasets()
+def build_merged_maps(
+    downloads_dir: Path,
+    natural_earth_zip: str,
+) -> dict[str, gpd.GeoDataFrame]:
+    paths = download_all_datasets(downloads_dir)
     dfs = load_all_csvs(paths)
-    world = load_world_map()
+    world = load_world_map(downloads_dir, natural_earth_zip)
 
     merged_maps: dict[str, gpd.GeoDataFrame] = {}
 
@@ -317,7 +289,6 @@ def build_merged_maps() -> dict[str, gpd.GeoDataFrame]:
         merged_maps[name] = merge_world_with_dataset(world, df, value_col)
 
     return merged_maps
-
 
 class OkavangoConfig(BaseModel):
     """
@@ -331,12 +302,23 @@ class OkavangoConfig(BaseModel):
         Filename of the Natural Earth zip file for the world map.
         Defaults to 'ne_110m_admin_0_countries.zip'.
     """
-
+    
     downloads_dir: Path = Path("downloads")
+    natural_earth_url: str = (
+        "https://naciscdn.org/naturalearth/110m/cultural/"
+        "ne_110m_admin_0_countries.zip"
+    )
     natural_earth_zip: str = "ne_110m_admin_0_countries.zip"
 
 
-class OkavangoData:
+class OkavangoConfig(BaseModel):
+    downloads_dir: Path = Path("downloads")
+    natural_earth_url: str = (
+        "https://naciscdn.org/naturalearth/110m/cultural/"
+        "ne_110m_admin_0_countries.zip"
+    )
+    natural_earth_zip: str = "ne_110m_admin_0_countries.zip"
+
     """
     Main data class that downloads, loads, and merges all environmental datasets.
 
@@ -364,23 +346,31 @@ class OkavangoData:
     >>> "red_list_index" in data.merged_maps
     True
     """
+    
+class OkavangoData:
+    def __init__(self, config: OkavangoConfig | None = None) -> None:
+        self.config = config or OkavangoConfig()
 
-    def __init__(self, config: OkavangoConfig):
-        self.config = config
+        # Download all tabular datasets and store their local paths.
+        self.paths = download_all_datasets(self.config.downloads_dir)
 
-        # Function 1: download all datasets and store their file paths.
-        self.paths = download_all_datasets()
+        # Download the Natural Earth map zip file.
+        download_natural_earth_map(
+            downloads_dir=self.config.downloads_dir,
+            url=self.config.natural_earth_url,
+            filename=self.config.natural_earth_zip,
+        )
 
-        # Read all CSVs into DataFrames and store them as attributes.
+        # Read all CSVs into DataFrames.
         self.dfs = load_all_csvs(self.paths)
 
-        # Load the world map GeoDataFrame from the Natural Earth zip file.
+        # Load the world map GeoDataFrame from the local Natural Earth zip file.
         self.world = load_world_map(
             downloads_dir=self.config.downloads_dir,
             natural_earth_zip=self.config.natural_earth_zip,
         )
 
-        # Function 2: merge each dataset with the world map, auto-detecting the value column.
+        # Merge each dataset with the world map.
         self.merged_maps = {}
         for name, df in self.dfs.items():
             value_col = detect_value_column(df)
