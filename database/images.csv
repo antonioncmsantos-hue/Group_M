@@ -23,7 +23,7 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,No
-2026-03-12T15:51:54.914532,41.498,64.572,13,images/img_lat_41_498000_lon_64_572000_zoom_13.png," This satellite image shows a vast landscape with various geological and environmental features. Here's a detailed analysis of the elements present in the image:
+2026-03-12T15:51:54.914532,41.498,64.572,13,images/img_lat_41_498000_lon_64_572000_zoom_10.png," This satellite image shows a vast landscape with various geological and environmental features. Here's a detailed analysis of the elements present in the image:
 
 1. Vegetation: The landscape is covered with a mix of vegetation. There are patches of green vegetation interspersed with brown areas, suggesting a mix of healthy and degraded land.
 
@@ -169,3 +169,171 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,Yes
+2026-03-16T14:08:28.436490,41.498,64.572,10,images/img_lat_41_498000_lon_64_572000_zoom_10.png," The satellite image displays a dry desert landscape with sparse vegetation. The terrain is predominantly arid with areas covered in patches of brown earth and rocky outcrops. There are signs of human activity as evidenced by the presence of scattered green plants, which may be vegetation for sustenance or decorative purposes. Water sources appear to be scarce, with only a few small puddles visible. Roads seem to crisscross the landscape, indicating some level of human development and possible use for transportation.
+
+The most striking feature is an area of land that appears to have been mined out, creating a stark contrast between the surrounding desert terrain and the cleared, almost empty space. There are also indications of erosion, with areas where the soil has become more loose and is being blown away by the wind.
+
+There are no visible signs of deforestation or land degradation as indicated in your request. The image does not provide information on fire scars or other environmental damage that might be present due to the nature of satellite imagery. It's important to note that without detailed, high-resolution imagery, it can be challenging to accurately assess such phenomena. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""Yes"",
+  ""confidence"": ""Medium"",
+  ""summary"": ""The satellite image suggests environmental danger due to mining activity and erosion in the desert landscape."",
+  ""reasons"": [
+    ""Mining activity creating a stark contrast with the surrounding terrain"",
+    ""Erosion visible in areas where soil has become loose and is being blown away by the wind""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,Yes
+2026-03-16T14:14:38.833250,-3.465,-62.216,10,images/img_lat_m3_465000_lon_m62_216000_zoom_10.png," The image you've provided appears to be a satellite image showcasing an area of the Earth. This particular image seems to focus on a region where there is dense vegetation, including large areas of forested land. There are distinct patterns of vegetation that suggest a variety of plant species or types, which can indicate biodiversity. Water bodies such as rivers and lakes are visible, with some appearing blue due to their calm surface or the presence of minerals, while others may be murky or greenish-brown.
+
+There are no clear signs of roads or urban expansion in this image, indicating that the area is likely remote or undeveloped at the time the satellite captured the scene. However, there are indications of land use changes, such as deforestation, which can be seen by the patches of bare soil and areas where vegetation has been cleared away to create open spaces. These clearings could suggest areas where crops have been planted or mining operations have taken place.
+
+There is also a notable presence of rivers and lakes, with some appearing quite deep and possibly rich in sediment or algae. The dark patches within the forests could be indicative of fire scars, which are areas where fires have occurred, leaving behind charred landscapes that can be seen from space.
+
+Overall, the image provides a glimpse into the natural landscape, highlighting features such as vegetation, water bodies, and human-induced changes like deforestation or land use conversion. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""Yes"",
+  ""confidence"": ""Medium"",
+  ""summary"": ""The satellite image reveals signs of environmental danger, including deforestation, fire scars, and potential mining activity, but the overall picture suggests that the area is still relatively pristine."",
+  ""reasons"": [
+    ""Deforestation"",
+    ""Fire scars"",
+    ""Potential mining activity""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,Yes
+2026-03-16T14:19:31.631469,41.499,64.572,12,images/img_lat_41_499000_lon_64_572000_zoom_12.png," The satellite image shows a desert landscape with various features that can be observed:
+
+1. **Vegetation**: The landscape is predominantly barren, with sparse vegetation visible only in certain areas. Green patches suggest the presence of shrubs or low-growing plants, likely adapted to the harsh desert conditions.
+
+2. **Water**: There are no significant water bodies like lakes or rivers that are immediately apparent in this image. The landscape appears extremely arid.
+
+3. **Roads and Urban Expansion**: There is a road network visible on the satellite image, with roads extending outward from what could be a mining operation or possibly a town center. No urban areas or high-density development can be seen from this perspective.
+
+4. **Bare Soil and Mining**: A large open pit mine is prominently featured in the middle of the image. This suggests that resource extraction, particularly for minerals such as copper or zinc, might be a significant activity in this area. The surrounding terrain appears disturbed, with large piles of excavated material, likely overburden, indicating recent or ongoing mining operations.
+
+5. **Mining**: There are several signs of mining activities, including the open pit mine mentioned above. The presence of such operations can be an indication of economic activity in the region.
+
+6. **Fire Scars**: There appear to be areas where the vegetation has been burned or otherwise damaged, which may suggest either a recent wildfire or another form of land degradation.
+
+7. **Erosion**: The sloping terrain and the absence of ground cover in certain areas indicate that erosion might be a concern in this landscape due to the lack of vegetation.
+
+8. **Deforestation/Land Degradation**: There are no visible signs of deforestation or large-scale land degradation in this image, as the area is predominantly desert with minimal tree cover.
+
+The satellite image provides a comprehensive view of the landscape, showing a mix of natural and human-induced features that characterize arid regions such as deserts. The presence of mining activities suggests a focus on resource extraction, which can have both positive and negative environmental impacts depending on the practices used and the extent to which they are managed sustainably. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""Yes"",
+  ""confidence"": ""High"",
+  ""summary"": ""The satellite image highlights several signs of potential environmental danger, including mining activity, erosion, fire scars, and land degradation, but no significant deforestation or flooding is observed."",
+  ""reasons"": [
+    ""Mining activity suggests a focus on resource extraction which can have both positive and negative environmental impacts."",
+    ""Erosion concerns due to the lack of vegetation and sloping terrain."",
+    ""Fire scars may indicate recent wildfires or land degradation.""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,Yes
+2026-03-16T15:25:08.276048,4.8,6.05,12,images/img_lat_4_800000_lon_6_050000_zoom_12.png," The image provided appears to be a satellite view of a section of Earth, likely taken from a higher altitude satellite such as an Landsat or similar Earth-observing satellite. It features the following elements:
+
+1. Vegetation: There is dense green vegetation visible in various areas, indicating lush forests and possibly wetlands or swamps. The colors suggest various types of foliage, with a mix of greens that could represent different plant species or stages of growth.
+
+2. Water: There are water bodies scattered across the image, which could be rivers, lakes, or other bodies of water. These areas are dark blue and surrounded by vegetation, indicating they may be surrounded by wetlands or forests.
+
+3. Roads: There are linear features that appear to be roads or pathways running through the landscape, indicated by lighter lines and a contrast to the surrounding green vegetation.
+
+4. Bare soil: There are patches of bare soil or exposed earth that are visible in various parts of the image. These areas might be cleared for agriculture, mining, or other human activities.
+
+5. Urban expansion: There is an area with a distinct pattern of urbanization, with more rectangular and linear land use patterns than the surrounding natural environment, which could indicate small towns or villages.
+
+6. Mining: There are areas where there appears to be some form of mining activity indicated by the presence of pits or excavations in the landscape. These areas may have been cleared for mining purposes.
+
+7. Fire scars: There are patches of bare, brown land that could be the result of past fires, indicating areas where vegetation has not fully regrown yet.
+
+8. Erosion: Some areas show signs of erosion, with patterns of soil movement or displacement visible on the landscape.
+
+9. Visible signs of deforestation or land degradation: There are areas where the natural vegetation appears to be sparse or has been replaced by more open land, possibly due to deforestation for agriculture, mining, or other human activities.
+
+This image provides a snapshot of the interaction between natural and human-induced processes on Earth's surface. It is important for understanding environmental change, land management practices, and the impact of human activities on ecosystems. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""Yes"",
+  ""confidence"": ""High"",
+  ""summary"": ""The satellite image reveals signs of deforestation, mining activity, wildfire scars, erosion, and urban expansion into natural land, indicating environmental danger."",
+  ""reasons"": [
+    ""Deforestation and land degradation"",
+    ""Mining activity"",
+    ""Wildfire scars"",
+    ""Erosion"",
+    ""Urban encroachment into natural land""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,Yes
+2026-03-16T15:25:48.204699,-1.65,23.5,11,images/img_lat_m1_650000_lon_23_500000_zoom_11.png," The satellite image shows a forested area with varying shades of green, indicating different types of vegetation. There are several areas that appear to be deforested or showing signs of deforestation, with patches where the green cover has been cleared, revealing brownish earth. These bare areas are scattered throughout the image, suggesting human activity or natural disturbances such as fires or disease outbreaks.
+
+There is no clear evidence of water bodies in this particular section of the image, and there are no distinct roads or mining operations visible from this perspective. The image does not show any smoke plumes or fire scars that would indicate a recent fire event, nor any significant erosion patterns or land degradation visible to the naked eye.
+
+The urban expansion is difficult to discern from this angle and resolution, as there are no clear indicators of infrastructure such as roads or buildings that would suggest an urbanized area. The image focuses more on the natural landscape with its forest cover and variations in vegetation density. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+",llava:7b,"{
+  ""danger"": ""No"",
+  ""confidence"": ""Low"",
+  ""summary"": ""The satellite image does not show clear signs of environmental danger such as deforestation, wildfires, or erosion."",
+  ""reasons"": [
+    ""Lack of evident water bodies and road infrastructure."",
+    ""No visible smoke plumes or fire scars."",
+    ""No significant land degradation patterns are detectable.""
+  ]
+}","You are an environmental risk screening assistant. Your task is to determine whether a satellite image description suggests that the area may be under environmental danger.
+Consider signs of deforestation, land degradation, erosion, mining activity, wildfire scars, flooding, drought, water stress, urban encroachment into natural land, and habitat destruction.
+Return ONLY valid JSON in this exact structure: {
+  ""danger"": ""Yes or No"",
+  ""confidence"": ""Low or Medium or High"",
+  ""summary"": ""one short paragraph"",
+  ""reasons"": [
+    ""reason 1"",
+    ""reason 2"",
+    ""reason 3""
+  ]
+}
+",llama3.2:3b,No
