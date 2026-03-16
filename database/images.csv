@@ -1,5 +1,5 @@
 timestamp,latitude,longitude,zoom,image_path,image_description,image_prompt,image_model,text_assessment,text_prompt,text_model,danger
-2026-03-12T15:44:37.313941,55.684,12.5932,20,C:\Users\João Pedro\Documents\Group_M\images\img_lat_55_684000_lon_12_593200_zoom_20.png," The image shows an aerial view of a courtyard with a central structure, likely an important building or monument, surrounded by a pattern of walkways or streets. The central structure is surrounded by a series of geometric shapes, possibly representing a grid or an enclosed area with a specific design. There are no visible signs of vegetation, water bodies, or bodies of water. The ground appears to be made of stone or concrete, with the pattern of the walkways creating a checkerboard or chessboard-like pattern. There are no indications of deforestation, land degradation, or mining activities. The overall scene suggests a well-organized and maintained urban or architectural complex, possibly a historical site given the central structure's design. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
+2026-03-12T15:44:37.313941,55.684,12.5932,20,images/img_lat_55_684000_lon_12_593200_zoom_20.png," The image shows an aerial view of a courtyard with a central structure, likely an important building or monument, surrounded by a pattern of walkways or streets. The central structure is surrounded by a series of geometric shapes, possibly representing a grid or an enclosed area with a specific design. There are no visible signs of vegetation, water bodies, or bodies of water. The ground appears to be made of stone or concrete, with the pattern of the walkways creating a checkerboard or chessboard-like pattern. There are no indications of deforestation, land degradation, or mining activities. The overall scene suggests a well-organized and maintained urban or architectural complex, possibly a historical site given the central structure's design. ","Describe this satellite image. Focus on vegetation, water, roads, bare soil, urban expansion, mining, fire scars, erosion, and visible signs of deforestation or land degradation.
 ",llava:7b,"{
   ""danger"": ""No"",
   ""confidence"": ""Low"",
@@ -23,7 +23,7 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,No
-2026-03-12T15:51:54.914532,41.498,64.572,13,C:\Users\João Pedro\Documents\Group_M\images\img_lat_41_498000_lon_64_572000_zoom_13.png," This satellite image shows a vast landscape with various geological and environmental features. Here's a detailed analysis of the elements present in the image:
+2026-03-12T15:51:54.914532,41.498,64.572,13,images/img_lat_41_498000_lon_64_572000_zoom_13.png," This satellite image shows a vast landscape with various geological and environmental features. Here's a detailed analysis of the elements present in the image:
 
 1. Vegetation: The landscape is covered with a mix of vegetation. There are patches of green vegetation interspersed with brown areas, suggesting a mix of healthy and degraded land.
 
@@ -67,7 +67,7 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,Yes
-2026-03-12T16:04:25.495537,41.4988,64.572,12,C:\Users\João Pedro\Documents\Group_M\images\img_lat_41_498800_lon_64_572000_zoom_12.png," The image shows a satellite view of a landscape with a combination of natural and human-made features. There is a large area of barren ground in the center, which appears to be a mining site or a mining-affected area, given the presence of what seem to be waste piles and structures that could be associated with mining operations. There are also large piles of debris or possibly a stockpile of some sort on the left side of the image.
+2026-03-12T16:04:25.495537,41.4988,64.572,12,images/img_lat_41_498800_lon_64_572000_zoom_12.png," The image shows a satellite view of a landscape with a combination of natural and human-made features. There is a large area of barren ground in the center, which appears to be a mining site or a mining-affected area, given the presence of what seem to be waste piles and structures that could be associated with mining operations. There are also large piles of debris or possibly a stockpile of some sort on the left side of the image.
 
 The surrounding landscape is mostly arid with sparse vegetation, which is typical of desert environments. There are no visible signs of deforestation or land degradation.
 
@@ -97,7 +97,7 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,Yes
-2026-03-12T16:15:29.549898,41.5088,64.19,10,C:\Users\João Pedro\Documents\Group_M\images\img_lat_41_508800_lon_64_190000_zoom_10.png," This image appears to be a satellite image of a desert landscape. The visible features include:
+2026-03-12T16:15:29.549898,41.5088,64.19,10,images/img_lat_41_508800_lon_64_190000_zoom_10.png," This image appears to be a satellite image of a desert landscape. The visible features include:
 
 1. Vegetation: There is minimal vegetation throughout the scene, indicating a desert environment.
 
@@ -140,7 +140,7 @@ Return ONLY valid JSON in this exact structure: {
   ]
 }
 ",llama3.2:3b,No
-2026-03-12T18:04:35.235417,-3.4653,-62.2159,10,C:\Users\anton\OneDrive - Nova SBE\Nova\S2\Advanced Programming\AP_GP\Group_M\images\img_lat_m3_465300_lon_m62_215900_zoom_10.png," This is an aerial image of what appears to be a large area of natural landscape, which includes various elements such as vegetation, water bodies, roads, bare soil, urban areas, mining sites, and fire scars. The image shows dense green forested areas that are indicative of healthy vegetation. There are patches where the forest is less dense, which could be due to deforestation or land degradation caused by human activities such as agriculture or mining. Water bodies can be seen interspersed throughout the landscape, some possibly being natural bodies and others man-made reservoirs.
+2026-03-12T18:04:35.235417,-3.4653,-62.2159,10,images/img_lat_m3_465300_lon_m62_215900_zoom_10.png," This is an aerial image of what appears to be a large area of natural landscape, which includes various elements such as vegetation, water bodies, roads, bare soil, urban areas, mining sites, and fire scars. The image shows dense green forested areas that are indicative of healthy vegetation. There are patches where the forest is less dense, which could be due to deforestation or land degradation caused by human activities such as agriculture or mining. Water bodies can be seen interspersed throughout the landscape, some possibly being natural bodies and others man-made reservoirs.
 
 There are roads crisscrossing through the area, indicating a developed infrastructure for transportation or resource extraction. The presence of bare soil could be due to natural processes like erosion or human activities such as deforestation or land clearance for agriculture. Urban areas with dense buildings and structures suggest human settlements and expansion into the surrounding environment. There are areas where mining is taking place, which can lead to land degradation and scarring on the landscape.
 

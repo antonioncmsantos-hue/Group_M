@@ -595,7 +595,7 @@ def append_analysis_to_database(
                 "latitude": latitude,
                 "longitude": longitude,
                 "zoom": zoom,
-                "image_path": str(image_path),
+                "image_path": str(image_path.relative_to(PROJECT_ROOT)),
                 "image_description": image_description,
                 "image_prompt": image_prompt,
                 "image_model": image_model,
@@ -777,7 +777,7 @@ elif page == "Satellite Analysis":
         if existing_result is not None:
             st.success("Analysis already exists in the database. Reusing stored result.")
 
-            existing_image_path = Path(existing_result["image_path"])
+            existing_image_path = PROJECT_ROOT / existing_result["image_path"]
             if existing_image_path.exists():
                 image = Image.open(existing_image_path)
                 st.image(image, caption="Satellite image", use_container_width=True)
