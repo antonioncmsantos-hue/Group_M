@@ -781,6 +781,8 @@ elif page == "Satellite Analysis":
             if existing_image_path.exists():
                 image = Image.open(existing_image_path)
                 st.image(image, caption="Satellite image", use_container_width=True)
+            else:
+                st.warning(f"Image file not found: {existing_image_path}")
 
             st.subheader("Image Description")
             st.write(existing_result["image_description"])
