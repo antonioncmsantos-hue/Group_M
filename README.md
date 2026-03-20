@@ -133,6 +133,9 @@ ollama serve
 
 > **Note:** The app automatically pulls the required models (`llava:7b` and `llama3.2:3b`) on first use if they are not already available. Model names and prompts can be changed in `models.yaml` without touching any code. The Maps page works without Ollama.
 
+> **Note:** `ollama serve` blocks the terminal while running — this is expected.
+> Open a new terminal tab before running the app in step 4.
+
 ### 4. Run the Application
 
 ```bash
